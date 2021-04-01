@@ -15,17 +15,33 @@ pd.set_option('display.max_columns', None)
 # # Import data and take a look at it
 
 # %%
-with open("data/model_apply_inputs/new_route_data.json", "r") as sam:
-    sample = json.load(sam)
-sample_df = pd.DataFrame(sample).transpose()
+with open("data/model_apply_inputs/new_route_data.json", "r") as rou:
+    sample_r = json.load(rou)
+sample_route = pd.DataFrame(sample_r).transpose()
+
+with open("data/model_apply_inputs/new_package_data.json", "r") as pack:
+    sample_p = json.load(pack)
+sample_package = pd.DataFrame(sample_p)
+
+with open("data/model_apply_inputs/new_travel_times.json", "r") as trav:
+    sample_t = json.load(trav)
+sample_travel = pd.DataFrame(sample_t)
 
 
 # %%
-sample_df.shape
+sample_route.shape
+sample_package.shape
+sample_travel.shape
 
 
 # %%
-sample_df.head()
+sample_route.head()
+
+# %%
+sample_package.head()
+
+# %%
+sample_travel.head()
 
 
 # %% [markdown]
