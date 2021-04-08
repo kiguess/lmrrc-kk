@@ -1,6 +1,7 @@
 # To add a new cell, type '# %%'
 # To add a new markdown cell, type '# %% [markdown]'
 # %%
+from typing import Sequence
 import pandas as pd
 import numpy as np
 import xgboost as xgb
@@ -15,33 +16,67 @@ pd.set_option('display.max_columns', None)
 # # Import data and take a look at it
 
 # %%
-with open("data/model_apply_inputs/new_route_data.json", "r") as rou:
+with open("data/model_build_inputs/route_data.json", "r") as rou:
     sample_r = json.load(rou)
-sample_route = pd.DataFrame(sample_r).transpose()
 
-with open("data/model_apply_inputs/new_package_data.json", "r") as pack:
+with open("data/model_build_inputs/package_data.json", "r") as pack:
     sample_p = json.load(pack)
-sample_package = pd.DataFrame(sample_p)
 
-with open("data/model_apply_inputs/new_travel_times.json", "r") as trav:
+with open("data/model_build_inputs/travel_times.json", "r") as trav:
     sample_t = json.load(trav)
-sample_travel = pd.DataFrame(sample_t)
+
+with open("data/model_build_inputs/actual_sequences.json", "r") as act:
+    act_seq = json.load(act)
 
 
 # %%
-sample_route.shape
-sample_package.shape
-sample_travel.shape
+# Data Processing
+def create_seq(seq: dict):
+    out = {}
+    for route in seq:
+        sorted_list = []
+        act = seq[route]['actual']
+        sorted_dict = dict(sorted(act.items(), key=lambda item: item[1]))
+        for key in sorted_dict:
+            sorted_list.append(key)
+        out[route] = sorted_list
+    return out
+
+def create_comb(rou: dict, seq: dict, trav: dict):
+    temp   = open("temp", "w")
+    header = ['RouteID', 'station_code', 'date', 'departure_time', 'from', 'to']
+    header2 = ['origin_lat', 'origin_long', 'dest_lat', 'dest_long', 'delta_lat', 'delta_long', 'time_taken']
+    header.extend(header2)
+    header = ','.join(header)
+    temp.write(header+'\n')
+    for route in rou:
+        stat_code = rou[route]['station_code']
+        date      = rou[route]['date_YYYY_MM_DD']
+        dep_time  = rou[route]['departure_time_utc']
+        for i in range(0, len(seq[route])-1):
+            stop0   = seq[route][i]
+            stop1   = seq[route][i+1]
+            st0_lat = rou[route]['stops'][stop0]['lat']
+            st0_lng = rou[route]['stops'][stop0]['lng']
+            st1_lat = rou[route]['stops'][stop1]['lat']
+            st1_lng = rou[route]['stops'][stop1]['lng']
+            dlat    = st1_lat - st0_lat
+            dlong   = st1_lng - st0_lng
+            time    = trav[route][stop0][stop1]
+            li      = [route, stat_code, date, dep_time, stop0, stop1]
+            li2     = [str(st0_lat), str(st0_lng), str(st1_lat), str(st1_lng), str(dlat), str(dlong), str(time)]
+            li.extend(li2)
+            out     = ','.join(li)
+            temp.write(out + '\n')
+            del(li)
+            del(out)
+    temp.close()
+    return pd.read_csv('temp')
+        
 
 
-# %%
-sample_route.head()
-
-# %%
-sample_package.head()
-
-# %%
-sample_travel.head()
+seq        = create_seq(act_seq)
+route_data = create_comb(sample_r, seq, sample_t)
 
 
 # %% [markdown]
