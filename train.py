@@ -34,20 +34,19 @@ with open("data/model_build_inputs/actual_sequences.json", "r") as act:
 def create_seq(seq: dict):
     out = {}
     for route in seq:
-        sorted_list = []
-        act = seq[route]['actual']
-        sorted_dict = dict(sorted(act.items(), key=lambda item: item[1]))
+        sorted_list  = []
+        act          = seq[route]['actual']
+        sorted_dict  = dict(sorted(act.items(), key=lambda item: item[1]))
         for key in sorted_dict:
             sorted_list.append(key)
         out[route] = sorted_list
     return out
 
 def create_comb(rou: dict, seq: dict, trav: dict):
-    temp   = open("temp", "w")
-    header = ['RouteID', 'station_code', 'date', 'departure_time', 'from', 'to']
-    header2 = ['origin_lat', 'origin_long', 'dest_lat', 'dest_long', 'delta_lat', 'delta_long', 'time_taken']
-    header.extend(header2)
-    header = ','.join(header)
+    temp        = open("temp", "w")
+    header      = ['RouteID', 'station_code', 'date', 'departure_time', 'from', 'to']
+    header.extend(['origin_lat', 'origin_long', 'dest_lat', 'dest_long', 'delta_lat', 'delta_long', 'time_taken'])
+    header      = ','.join(header)
     temp.write(header+'\n')
     for route in rou:
         stat_code = rou[route]['station_code']
@@ -64,8 +63,7 @@ def create_comb(rou: dict, seq: dict, trav: dict):
             dlong   = st1_lng - st0_lng
             time    = trav[route][stop0][stop1]
             li      = [route, stat_code, date, dep_time, stop0, stop1]
-            li2     = [str(st0_lat), str(st0_lng), str(st1_lat), str(st1_lng), str(dlat), str(dlong), str(time)]
-            li.extend(li2)
+            li.extend([str(st0_lat), str(st0_lng), str(st1_lat), str(st1_lng), str(dlat), str(dlong), str(time)])
             out     = ','.join(li)
             temp.write(out + '\n')
             del(li)
