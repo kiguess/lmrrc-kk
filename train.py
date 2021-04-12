@@ -45,7 +45,8 @@ def create_seq(seq: dict):
 def create_comb(rou: dict, seq: dict, trav: dict):
     temp        = open("temp", "w")
     header      = ['RouteID', 'station_code', 'date', 'departure_time', 'from', 'to']
-    header.extend(['origin_lat', 'origin_long', 'dest_lat', 'dest_long', 'delta_lat', 'delta_long', 'time_taken'])
+    header.extend(['origin_lat', 'origin_long', 'dest_lat', 'dest_long', 'delta_lat', 'delta_long'])
+    header.extend(['time_taken', 'score'])
     header      = ','.join(header)
     temp.write(header+'\n')
     for route in rou:
@@ -62,8 +63,11 @@ def create_comb(rou: dict, seq: dict, trav: dict):
             dlat    = st1_lat - st0_lat
             dlong   = st1_lng - st0_lng
             time    = trav[route][stop0][stop1]
+            scorest = rou[route]['route_score'] 
+            score   = 9 if scorest=='High' else 5 if scorest=='Medium' else 1
             li      = [route, stat_code, date, dep_time, stop0, stop1]
-            li.extend([str(st0_lat), str(st0_lng), str(st1_lat), str(st1_lng), str(dlat), str(dlong), str(time)])
+            li.extend([str(st0_lat), str(st0_lng), str(st1_lat), str(st1_lng), str(dlat), str(dlong)])
+            li.extend([str(time), str(score)])
             out     = ','.join(li)
             temp.write(out + '\n')
             del(li)
