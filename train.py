@@ -44,17 +44,21 @@ def create_seq(seq: dict):
     return out
 
 def create_comb(rou: dict, seq: dict, trav: dict):
+    from datetime import datetime
+    from dateutil.relativedelta import relativedelta
+
     temp        = open("temp", "w")
     header      = ['RouteID', 'station_code', 'date', 'departure_time', 'from', 'to']
     header.extend(['origin_lat', 'origin_long', 'dest_lat', 'dest_long', 'delta_lat', 'delta_long'])
     header.extend(['time_taken', 'score'])
     header      = ','.join(header)
     temp.write(header+'\n')
-    
+
     for route in rou:
         stat_code = rou[route]['station_code']
         date      = rou[route]['date_YYYY_MM_DD']
         dep_time  = rou[route]['departure_time_utc']
+        dep_timed = datetime.strptime(dep_time, '%H:%M:%S')
         for i in range(0, len(seq[route])-1):
             stop0   = seq[route][i]
             stop1   = seq[route][i+1]
@@ -74,7 +78,9 @@ def create_comb(rou: dict, seq: dict, trav: dict):
 
             out     = ','.join(li)
             temp.write(out + '\n')
-
+            
+            dep_timed = dep_timed + relativedelta(seconds=time)
+            dep_time  = datetime.strftime(dep_timed, '%H:%M:%S')
             del(li)
             del(out)
     temp.close()
