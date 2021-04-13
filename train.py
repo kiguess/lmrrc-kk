@@ -6,6 +6,7 @@ import pandas as pd
 import numpy as np
 import xgboost as xgb
 import json
+import gc
 
 import pickle
 from sklearn.model_selection import train_test_split
@@ -49,6 +50,7 @@ def create_comb(rou: dict, seq: dict, trav: dict):
     header.extend(['time_taken', 'score'])
     header      = ','.join(header)
     temp.write(header+'\n')
+    
     for route in rou:
         stat_code = rou[route]['station_code']
         date      = rou[route]['date_YYYY_MM_DD']
@@ -65,11 +67,14 @@ def create_comb(rou: dict, seq: dict, trav: dict):
             time    = trav[route][stop0][stop1]
             scorest = rou[route]['route_score'] 
             score   = 9 if scorest=='High' else 5 if scorest=='Medium' else 1
+
             li      = [route, stat_code, date, dep_time, stop0, stop1]
             li.extend([str(st0_lat), str(st0_lng), str(st1_lat), str(st1_lng), str(dlat), str(dlong)])
             li.extend([str(time), str(score)])
+
             out     = ','.join(li)
             temp.write(out + '\n')
+
             del(li)
             del(out)
     temp.close()
@@ -80,6 +85,12 @@ def create_comb(rou: dict, seq: dict, trav: dict):
 seq        = create_seq(act_seq)
 route_data = create_comb(sample_r, seq, sample_t)
 
+del(sample_r)
+del(sample_t)
+del(seq)
+gc.collect()
+
+route_data.head()
 
 # %% [markdown]
 # ## Engineer features
