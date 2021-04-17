@@ -7,16 +7,21 @@ import numpy as np
 import xgboost as xgb
 import json
 import gc
+import logging
 
 import pickle
 from sklearn.model_selection import train_test_split
 
 pd.set_option('display.max_columns', None)
 BASE_DIR = path.dirname(path.dirname(path.abspath(__file__)))
+logfile  = path.join(BASE_DIR, 'build.log')
+logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', filename=logfile, encoding='utf-8', level=logging.DEBUG, filemode='w')
+logging.info('Build started')
 
 
 # %%
 # Import data
+logging.info("Importing data")
 with open(path.join(BASE_DIR, "data/model_build_inputs/route_data.json"), "r") as rou:
     sample_r = json.load(rou)
 
@@ -26,10 +31,13 @@ with open(path.join(BASE_DIR, "data/model_build_inputs/travel_times.json"), "r")
 with open(path.join(BASE_DIR, "data/model_build_inputs/actual_sequences.json"), "r") as act:
     act_seq = json.load(act)
 
+logging.info('Import completed')
+
 
 # %%
 # Data Processing
 def create_seq(seq: dict):
+    logging.info("Creating sequences")
     out = {}
     for route in seq:
         sorted_list  = []
@@ -38,11 +46,13 @@ def create_seq(seq: dict):
         for key in sorted_dict:
             sorted_list.append(key)
         out[route] = sorted_list
+    logging.info('Sequence created')
     return out
 
 def create_comb(rou: dict, seq: dict, trav: dict):
     from datetime import datetime
     from dateutil.relativedelta import relativedelta
+    logging.info('Creating dataframe from data')
 
     temp        = open("temp", "w")
     header      = ['RouteID', 'station_code', 'date', 'departure_time', 'from', 'to']
@@ -81,6 +91,7 @@ def create_comb(rou: dict, seq: dict, trav: dict):
             del(li)
             del(out)
     temp.close()
+    logging.info('temp csv created')
     return pd.read_csv('temp')
         
 
@@ -93,11 +104,11 @@ del(sample_t)
 del(act_seq)
 del(seq)
 gc.collect()
-
-route_data.head()
+logging.info('Garbage collected')
 
 
 # %%
+logging.info('Splitting data')
 X = route_data.drop('score', axis=1)
 y = route_data['score']
 
@@ -106,6 +117,7 @@ y = route_data['score']
 #Split the data into training, test, and valdiation sets
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=2018)
 X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.25, random_state=2019)
+logging.info('Data splitted')
 
 
 # %%
@@ -138,23 +150,28 @@ watchlist = [(dval, 'eval'), (dtrain, 'train')]
 
 # %%
 #Train model
+logging.info('Starting training with params: ' + params)
 gbm = xgb.train(params,
                 dtrain,
                 num_boost_round = nrounds,
                 evals = watchlist,
                 verbose_eval = True
                 )
+logging.info('Training finished')
 
 
 # %%
 #Test predictions
+logging.info('Running prediction')
 pred = np.exp(gbm.predict(xgb.DMatrix(X_test))) - 1
+logging.info('Prediction done')
 
 
 # %%
 #Use mean absolute error to get a basic estimate of the error
 mae = (abs(pred - y_test)).mean()
 mae
+logging.info('Mean absolute error:\n'+mae)
 
 
 # %%
@@ -173,13 +190,17 @@ for key in feature_scores:
     feature_scores[key] = feature_scores[key] / summ
 
 feature_scores
+logging.info('Feature scores:\n'+feature_scores)
+
 
 # %% [markdown]
 # # Save the model
 
 # %%
+logging.info('Saving model..')
 filename = "xgb_model.sav"
 pickle.dump(gbm, open(filename, 'wb'))
 
 gbm.save_model(path.join(BASE_DIR, 'data/model_build_output/out.model'))
+logging.info('Model saved')
 
