@@ -1,7 +1,7 @@
 # To add a new cell, type '# %%'
 # To add a new markdown cell, type '# %% [markdown]'
 # %%
-from typing import Sequence
+from os import path
 import pandas as pd
 import numpy as np
 import xgboost as xgb
@@ -12,18 +12,18 @@ import pickle
 from sklearn.model_selection import train_test_split
 
 pd.set_option('display.max_columns', None)
+BASE_DIR = path.dirname(path.dirname(path.abspath(__file__)))
 
-# %% [markdown]
-# # Import data and take a look at it
 
 # %%
-with open("data/model_build_inputs/route_data.json", "r") as rou:
+# Import data
+with open(path.join(BASE_DIR, "data/model_build_inputs/route_data.json"), "r") as rou:
     sample_r = json.load(rou)
 
-with open("data/model_build_inputs/travel_times.json", "r") as trav:
+with open(path.join(BASE_DIR, "data/model_build_inputs/travel_times.json"), "r") as trav:
     sample_t = json.load(trav)
 
-with open("data/model_build_inputs/actual_sequences.json", "r") as act:
+with open(path.join(BASE_DIR, "data/model_build_inputs/actual_sequences.json"), "r") as act:
     act_seq = json.load(act)
 
 
@@ -96,44 +96,6 @@ gc.collect()
 
 route_data.head()
 
-# %% [markdown]
-# ## Engineer features
-
-# %%
-#First, convert datetime strings into datetime
-sample_df["datetime"] = pd.to_datetime(sample_df["date_YYYY_MM_DD"] + " " + sample_df["departure_time_utc"], format='%Y-%m-%d %H:%M:%S')
-
-
-# %%
-#Now construct other variables, like month, date, etc.
-sample_df["month"] = sample_df["datetime"].dt.month
-sample_df["day"] = sample_df["datetime"].dt.day
-sample_df["weekday"] = sample_df["datetime"].dt.weekday #sample_df["pickup_weekday"] = sample_df["pickup_datetime"].dt.weekday_name
-sample_df["hour"] = sample_df["datetime"].dt.hour
-sample_df["minute"] = sample_df["datetime"].dt.minute
-
-
-# %%
-#Get latitude and longitude differences 
-sample_df["latitude_difference"] = sample_df["dropoff_latitude"] - sample_df["pickup_latitude"]
-sample_df["longitude_difference"] = sample_df["dropoff_longitude"] - sample_df["pickup_longitude"]
-
-
-# %%
-#Convert duration to minutes for easier interpretation
-sample_df["trip_duration"] = sample_df["trip_duration"].apply(lambda x: round(x/60))   
-
-
-# %%
-#Convert trip distance from longitude and latitude differences to Manhattan distance.
-sample_df["trip_distance"] = 0.621371 * 6371 * (abs(2 * np.arctan2(np.sqrt(np.square(np.sin((abs(sample_df["latitude_difference"]) * np.pi / 180) / 2))), 
-                                  np.sqrt(1-(np.square(np.sin((abs(sample_df["latitude_difference"]) * np.pi / 180) / 2)))))) + \
-                                     abs(2 * np.arctan2(np.sqrt(np.square(np.sin((abs(sample_df["longitude_difference"]) * np.pi / 180) / 2))), 
-                                  np.sqrt(1-(np.square(np.sin((abs(sample_df["longitude_difference"]) * np.pi / 180) / 2)))))))
-
-
-# %%
-sample_df.head(5)
 
 # %% [markdown]
 # # Modeling
