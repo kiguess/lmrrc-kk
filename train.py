@@ -90,6 +90,7 @@ route_data = create_comb(sample_r, seq, sample_t)
 
 del(sample_r)
 del(sample_t)
+del(act_seq)
 del(seq)
 gc.collect()
 
