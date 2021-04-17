@@ -109,7 +109,7 @@ logging.info('Garbage collected')
 
 # %%
 logging.info('Splitting data')
-X = route_data.drop('score', axis=1)
+X = route_data.drop(['score','RouteID','date','to','from','station_code','departure_time'], axis=1)
 y = route_data['score']
 
 
