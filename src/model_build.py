@@ -97,12 +97,9 @@ gc.collect()
 route_data.head()
 
 
-# %% [markdown]
-# # Modeling
-
 # %%
-X = sample_df.drop(["trip_duration", "id", "vendor_id", "pickup_datetime", "dropoff_datetime"], axis=1)
-y = sample_df["trip_duration"]
+X = route_data.drop('score', axis=1)
+y = route_data['score']
 
 
 # %%
@@ -112,24 +109,17 @@ X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.
 
 
 # %%
-#Define evaluation metric
-def rmsle(y_true, y_pred):
-    assert len(y_true) == len(y_pred)
-    return np.square(np.log(y_pred + 1) - np.log(y_true + 1)).mean() ** 0.5
-
-
-# %%
 #XGBoost parameters 
 params = {
     'booster':            'gbtree',
-    'objective':          'reg:linear',
+    'objective':          'reg:squarederror',
     'learning_rate':      0.05,
     'max_depth':          14,
     'subsample':          0.9,
     'colsample_bytree':   0.7,
     'colsample_bylevel':  0.7,
     'silent':             1,
-    'feval':              'rmsle'
+    'eval_metric':        'rmse'
 }
 
 
@@ -191,4 +181,5 @@ feature_scores
 filename = "xgb_model.sav"
 pickle.dump(gbm, open(filename, 'wb'))
 
+gbm.save_model(path.join(BASE_DIR, 'data/model_build_output/out.model'))
 
