@@ -20,9 +20,6 @@ pd.set_option('display.max_columns', None)
 with open("data/model_build_inputs/route_data.json", "r") as rou:
     sample_r = json.load(rou)
 
-with open("data/model_build_inputs/package_data.json", "r") as pack:
-    sample_p = json.load(pack)
-
 with open("data/model_build_inputs/travel_times.json", "r") as trav:
     sample_t = json.load(trav)
 
