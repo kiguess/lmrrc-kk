@@ -150,7 +150,7 @@ watchlist = [(dval, 'eval'), (dtrain, 'train')]
 
 # %%
 #Train model
-logging.info('Starting training with params: ' + params)
+logging.info('Starting training with params: ' + str(params))
 gbm = xgb.train(params,
                 dtrain,
                 num_boost_round = nrounds,
@@ -171,7 +171,7 @@ logging.info('Prediction done')
 #Use mean absolute error to get a basic estimate of the error
 mae = (abs(pred - y_test)).mean()
 mae
-logging.info('Mean absolute error:\n'+mae)
+logging.info('Mean absolute error:\n'+str(mae))
 
 
 # %%
@@ -190,7 +190,7 @@ for key in feature_scores:
     feature_scores[key] = feature_scores[key] / summ
 
 feature_scores
-logging.info('Feature scores:\n'+feature_scores)
+logging.info('Feature scores:\n'+str(feature_scores))
 
 
 # %% [markdown]
