@@ -200,12 +200,12 @@ logging.info('Feature scores:\n'+str(feature_scores))
 
 # %%
 logging.info('Saving model..')
-filename = path.join(BASE_DIR, "data/model_build_output/model.sav")
-pickle.dump(gbm, open(filename, 'wb'))
+model_path  = str(path.join(BASE_DIR, "data/model_build_output/"))
+pickle.dump(gbm, open(model_path+'model.sav', 'wb'))
 
-gbm.save_model(path.join(BASE_DIR, 'data/model_build_output/model.json'))
+gbm.save_model(model_path+'model.json')
 dump = gbm.dump_model()
 logging.info("Does this work?\n\n" + str(dump))
-gbm.dump_model(path.join(BASE_DIR, 'data/model_build_output/model.txt'), path.join(BASE_DIR, 'data/model_build_output/featmap.txt'))
+gbm.dump_model(model_path+'model.txt', model_path+'featmap.txt')
 logging.info('Model saved')
 
