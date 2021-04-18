@@ -200,28 +200,11 @@ logging.info('Feature scores:\n'+str(feature_scores))
 
 # %%
 logging.info('Saving model..')
-model_path  = str(path.join(BASE_DIR, "data/model_build_output/"))
+model_path  = str(path.join(BASE_DIR, "data/model_build_outputs/"))
 
-def file_exist(file:str):
-    try:
-        f = open(file, 'w')
-    except:
-        f = open(file, 'x')
-    f.close()
-
-file_exist(model_path+'model.sav')
-with open(model_path+'model.sav', 'wb') as f:
-    pickle.dump(gbm, f)
-
-file_exist(model_path+'model.json')
-with open(model_path+'model.json', 'w') as f:
-    gbm.save_model(f)
-
-file_exist(model_path+'model.txt')
-file_exist(model_path+'featmap.txt')
-with open(model_path+'model.txt', 'w') as m:
-    with open(model_path+'featmap.txt', 'w') as f:
-        gbm.dump_model(m, f)
+pickle.dump(gbm, model_path+'model.sav')
+gbm.save_model(model_path+'model.json', 'w')
+gbm.dump_model(model_path+'model.txt', model_path+'featmap.txt')
 
 logging.info('Model saved')
 
