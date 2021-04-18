@@ -52,10 +52,11 @@ def create_seq(seq: dict):
 def create_comb(rou: dict, seq: dict, trav: dict):
     from datetime import datetime
     from dateutil.relativedelta import relativedelta
+    from calendar import day_name
     logging.info('Creating dataframe from data')
 
     temp        = open("temp", "w")
-    header      = ['RouteID', 'station_code', 'date', 'departure_time', 'from', 'to']
+    header      = ['RouteID', 'station_code', 'day', 'departure_time', 'from', 'to']
     header.extend(['origin_lat', 'origin_long', 'dest_lat', 'dest_long', 'delta_lat', 'delta_long'])
     header.extend(['time_taken', 'score'])
     header      = ','.join(header)
@@ -63,7 +64,8 @@ def create_comb(rou: dict, seq: dict, trav: dict):
 
     for route in rou:
         stat_code = rou[route]['station_code']
-        date      = rou[route]['date_YYYY_MM_DD']
+        date      = datetime.date.fromisoformat(rou[route]['date_YYYY_MM_DD'])
+        day       = day_name[date.weekday()]
         dep_time  = rou[route]['departure_time_utc']
         dep_timed = datetime.strptime(dep_time, '%H:%M:%S')
         for i in range(0, len(seq[route])-1):
@@ -79,7 +81,7 @@ def create_comb(rou: dict, seq: dict, trav: dict):
             scorest = rou[route]['route_score'] 
             score   = 9 if scorest=='High' else 5 if scorest=='Medium' else 1
 
-            li      = [route, stat_code, date, dep_time, stop0, stop1]
+            li      = [route, stat_code, day, dep_time, stop0, stop1]
             li.extend([str(st0_lat), str(st0_lng), str(st1_lat), str(st1_lng), str(dlat), str(dlong)])
             li.extend([str(time), str(score)])
 
