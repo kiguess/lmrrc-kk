@@ -111,7 +111,7 @@ logging.info('Garbage collected')
 
 # %%
 logging.info('Splitting data')
-X = route_data.drop(['score','RouteID','date','to','from','station_code','departure_time'], axis=1)
+X = route_data.drop(['score','RouteID','to','from','station_code'], axis=1)
 y = route_data['score']
 
 
@@ -143,8 +143,8 @@ nrounds = 2000
 
 # %%
 #Define train and validation sets
-dtrain = xgb.DMatrix(X_train, np.log(y_train+1))
-dval = xgb.DMatrix(X_val, np.log(y_val+1))
+dtrain = xgb.DMatrix(X_train, np.log(y_train+1), enable_categorical=True)
+dval = xgb.DMatrix(X_val, np.log(y_val+1), enable_categorical=True)
 
 #this is for tracking the error
 watchlist = [(dval, 'eval'), (dtrain, 'train')]
@@ -165,7 +165,7 @@ logging.info('Training finished')
 # %%
 #Test predictions
 logging.info('Running prediction')
-pred = np.exp(gbm.predict(xgb.DMatrix(X_test))) - 1
+pred = np.exp(gbm.predict(xgb.DMatrix(X_test, enable_categorical=True))) - 1
 logging.info('Prediction done')
 
 
