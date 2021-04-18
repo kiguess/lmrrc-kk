@@ -204,7 +204,7 @@ model_path  = str(path.join(BASE_DIR, "data/model_build_outputs/"))
 
 pickle.dump(gbm, open(model_path+'model.sav', 'wb'))
 gbm.save_model(model_path+'model.json')
-gbm.dump_model(model_path+'model.txt', model_path+'featmap.txt')
+gbm.dump_model(model_path+'dump.txt')
 
 logging.info('Model saved')
 
