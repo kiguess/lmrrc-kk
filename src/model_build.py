@@ -82,7 +82,7 @@ def create_comb(rou: dict, seq: dict, trav: dict):
             dlong   = st1_lng - st0_lng
             time    = trav[route][stop0][stop1]
             scorest = rou[route]['route_score'] 
-            score   = 9 if scorest=='High' else 5 if scorest=='Medium' else 1
+            score   = 100 if scorest=='High' else 10 if scorest=='Medium' else 1
 
             li      = [route, stat_code, day, str(hour), stop0, stop1]
             li.extend([str(st0_lat), str(st0_lng), str(st1_lat), str(st1_lng), str(dlat), str(dlong)])
