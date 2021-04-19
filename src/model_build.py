@@ -170,6 +170,13 @@ logging.info('Prediction done')
 
 
 # %%
+#Use mean absolute error to get a basic estimate of the error
+mae = (abs(pred - y_test)).mean()
+mae
+logging.info('Mean absolute error:\n'+str(mae))
+
+
+# %%
 #Use root mean square error to get a basic estimate of the error
 from math import sqrt
 rmse = sqrt(((pred - y_test)**2).mean())
