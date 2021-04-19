@@ -18,6 +18,8 @@ logfile  = path.join(BASE_DIR, 'build.log')
 logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', filename=logfile, encoding='utf-8', level=logging.DEBUG, filemode='w')
 logging.info('Build started')
 
+output_path  = str(path.join(BASE_DIR, "data/model_build_outputs/"))
+
 
 # %%
 # Import data
@@ -55,7 +57,7 @@ def create_comb(rou: dict, seq: dict, trav: dict):
     from calendar import day_name
     logging.info('Creating dataframe from data')
 
-    temp        = open("temp", "w")
+    temp        = open(output_path+"temp", "w")
     header      = ['RouteID', 'station_code', 'day', 'hour', 'from', 'to']
     header.extend(['origin_lat', 'origin_long', 'dest_lat', 'dest_long', 'delta_lat', 'delta_long'])
     header.extend(['time_taken', 'score'])
@@ -94,7 +96,7 @@ def create_comb(rou: dict, seq: dict, trav: dict):
             del(out)
     temp.close()
     logging.info('temp csv created')
-    return pd.read_csv('temp')
+    return pd.read_csv(output_path+'temp')
         
 
 
@@ -207,11 +209,10 @@ logging.info('Feature scores:\n'+str(feature_scores))
 
 # %%
 logging.info('Saving model..')
-model_path  = str(path.join(BASE_DIR, "data/model_build_outputs/"))
 
-pickle.dump(gbm, open(model_path+'model.sav', 'wb'))
-gbm.save_model(model_path+'model.json')
-gbm.dump_model(model_path+'dump.txt')
+pickle.dump(gbm, open(output_path+'model.sav', 'wb'))
+gbm.save_model(output_path+'model.json')
+gbm.dump_model(output_path+'dump.txt')
 
 logging.info('Model saved')
 
