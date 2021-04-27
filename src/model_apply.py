@@ -1,20 +1,39 @@
+# %%
 from os import path
-import sys, json, time
+import json, time, gc, logging
+import xgboost as xgb
 
 # Get Directory
 BASE_DIR = path.dirname(path.dirname(path.abspath(__file__)))
+output_path  = str(path.join(BASE_DIR, "data/model_apply_outputs/"))
+logfile  = path.join(output_path, 'apply.log')
 
-# Read input data
-print('Reading Input Data')
-# Model Build output
-model_path=path.join(BASE_DIR, 'data/model_build_outputs/model.json')
-with open(model_path, newline='') as in_file:
-    model_build_out = json.load(in_file)
-# Prediction Routes (Model Apply input)
+logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', filename=logfile, encoding='utf-8', level=logging.DEBUG, filemode='w')
+logging.info('Started')
+
+
+# %%
+# Load model
+logging.info('Loading model')
+model_path = path.join(BASE_DIR, 'data/model_build_outputs/model.json')
+model      = xgb.Booster()
+model.load_model(model_path)
+
+
+# %%
+# Load new data to predict
+logging.info('Loading data')
 prediction_routes_path = path.join(BASE_DIR, 'data/model_apply_inputs/new_route_data.json')
 with open(prediction_routes_path, newline='') as in_file:
     prediction_routes = json.load(in_file)
 
+travel_times_path = path.join(BASE_DIR, 'data/model_apply_inputs/new_travel_times.json')
+with open(travel_times_path, 'r') as file:
+    travel_times = json.load(file)
+logging.info('Data loaded')
+
+
+# %%
 def sort_by_key(stops, sort_by):
     """
     Takes in the `prediction_routes[route_id]['stops']` dictionary
