@@ -132,6 +132,35 @@ def propose_all_routes(prediction_routes, sort_by):
     """
     return {key:{'proposed':sort_by_key(stops=value['stops'], sort_by=sort_by)} for key, value in prediction_routes.items()}
 
+
+# %%
+# Travel times sorting
+logging.info('Making a list for travel times')
+def sorted_key(to_sort: dict):
+    'Return list with keys already sorted'
+    return sorted(to_sort, key=to_sort.get)
+
+
+def sort_travel_times(travel_times: dict):
+    '''
+    Takes the travel times and sort by shortest time for each stops to go to another stop.
+
+    Return a dict containing sorted lists from each stops on each routes
+    '''
+    sorted_trav = {}
+    for route in travel_times:
+        sorted_trav[route] = {}
+        for stops in travel_times[route]:
+            sorted_trav[route][stops] = []
+            sorted_trav[route][stops] = sorted_key(travel_times[route][stops])
+    
+    return sorted_trav
+
+travel_times_sorted = sort_travel_times(travel_times)
+logging.info('Travel times list done')
+
+
+# %%
 # Apply faux algorithms to pass time
 time.sleep(1)
 print('Solving Dark Matter Waveforms')
