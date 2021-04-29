@@ -34,6 +34,7 @@ logging.info('Data loaded')
 
 
 # %%
+# Functions that might be useful
 def sort_by_key(stops, sort_by):
     """
     Takes in the `prediction_routes[route_id]['stops']` dictionary
@@ -132,16 +133,22 @@ def propose_all_routes(prediction_routes, sort_by):
     """
     return {key:{'proposed':sort_by_key(stops=value['stops'], sort_by=sort_by)} for key, value in prediction_routes.items()}
 
+def get_station(route_data: dict) -> str:
+    'Return the name of the station in a route.'
+    for stops in route_data['stops']:
+        if (route_data['stops'][stops]['type'] == 'Station'):
+            return stops
+
 
 # %%
 # Travel times sorting
 logging.info('Making a list for travel times')
-def sorted_key(to_sort: dict):
+def sorted_key(to_sort: dict) -> list:
     'Return list with keys already sorted'
     return sorted(to_sort, key=to_sort.get)
 
 
-def sort_travel_times(travel_times: dict):
+def sort_travel_times(travel_times: dict) -> dict:
     '''
     Takes the travel times and sort by shortest time for each stops to go to another stop.
 
@@ -158,6 +165,10 @@ def sort_travel_times(travel_times: dict):
 
 travel_times_sorted = sort_travel_times(travel_times)
 logging.info('Travel times list done')
+
+
+# %%
+
 
 
 # %%
