@@ -160,6 +160,7 @@ def sort_travel_times(travel_times: dict) -> dict:
         for stops in travel_times[route]:
             sorted_trav[route][stops] = []
             sorted_trav[route][stops] = sorted_key(travel_times[route][stops])
+            sorted_trav[route][stops].pop(0)
     
     return sorted_trav
 
@@ -168,7 +169,51 @@ logging.info('Travel times list done')
 
 
 # %%
+def create_proposal(route_data: dict, travel: dict, travel_sort: dict) -> list:
+    '''
+    Params:
+    route_data : data of the current route
+    trav       : travel times of this route
+    trav_sort  : sorted travel times of this route
+    '''
+    trav      = travel.copy()
+    trav_sort = travel_sort.copy()
+    station   = get_station(route_data)
+    propose   = [station,]
+    to_go     = []
+    for stops in route_data['stops']:
+        to_go.append(stops)
+    
+    def remove_from_all(stop: str):
+        'remove the specified stop from all mentions'
+        to_go.remove(stop)
 
+        for stops in trav:
+            trav[stops].__delitem__(stop)
+            trav_sort[stops].remove(stop)
+
+    current = station
+    while to_go.__len__() != 0:
+        remove_from_all(current)
+        scores = {}
+        
+        for next_stop in trav_sort[current][:3]:
+            # Insert prediction stuff here and assign to scores[next_stop+'_self']
+
+            sum = 0
+            scores[next_stop] = {}
+            for future_stop in trav_sort[next_stop][:3]:
+                # Insert prediction stuff here and assign to scores[next_stop][future_stop] and add to sum
+            
+            scores[next_stop+'_total'] = scores[next_stop+'_self'] + sum
+        
+        best   = trav_sort[current][:1]
+        for next_stop in trav_sort[current][:3]:
+            if scores[next_stop+'_total']>scores[best+'_total']:
+                best = next_stop
+        
+        propose.extend(best)
+        current = best
 
 
 # %%
