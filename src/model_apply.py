@@ -154,8 +154,9 @@ def create_proposal(route_data: dict, travel: dict, travel_sort: dict) -> list:
                 pred      = exp(model.predict(test_pred)) - 1 # returns an 1*1 array
                 
                 scores[next_stop][future_stop] = pred[0]
+                sum += pred[0]
             
-            scores[next_stop+'_total'] = scores[next_stop+'_self'] + sum  # the final score to use for considering which to choose
+            scores[next_stop+'_total'] = 5 * scores[next_stop+'_self'] + sum  # the final score to use for considering which to choose
             if scores[next_stop+'_total']>scores[best+'_total']:
                 best = next_stop
         
