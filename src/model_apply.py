@@ -1,6 +1,6 @@
 # %%
 from os import path
-import json, time, gc, logging
+import json, gc, logging
 import xgboost as xgb
 from pandas import DataFrame
 from numpy import exp
