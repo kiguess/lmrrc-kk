@@ -202,5 +202,3 @@ with open(result_path, 'w') as out_file:
 
 logging.info('Done')
 print('Done!')
-
-# %%
