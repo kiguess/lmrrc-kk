@@ -2,6 +2,8 @@
 from os import path
 import json, time, gc, logging
 import xgboost as xgb
+from pandas import DataFrame
+from numpy import exp
 
 # Get Directory
 BASE_DIR = path.dirname(path.dirname(path.abspath(__file__)))
@@ -166,21 +168,55 @@ def sort_travel_times(travel_times: dict) -> dict:
 
 travel_times_sorted = sort_travel_times(travel_times)
 logging.info('Travel times list done')
+gc.collect()
 
 
 # %%
+# Functions for proposal
+def create_dmatrix(route_data: dict, travel: dict, origin: str, dest: str, time_passed: float=0) -> xgb.DMatrix:
+    '''
+    Return a DMatrix containing all data for training of specific part of a route
+    Params:
+    route_data  = route data of THIS route only
+    travel      = Travel time of this route
+    origin      = travel from which stop
+    dest        = travel to which stop
+    time_passed = time passed in this route (in seconds)
+    '''
+    import datetime
+    from dateutil.relativedelta import relativedelta
+
+    dep_time = datetime.datetime.strptime(route_data['departure_time_utc'], '%H:%M:%S') + relativedelta(seconds=time_passed)
+    hour    = dep_time.hour + dep_time.minute/60
+    st0_lat = route_data['stops'][origin]['lat']
+    st0_lng = route_data['stops'][origin]['lng']
+    st1_lat = route_data['stops'][dest]['lat']
+    st1_lng = route_data['stops'][dest]['lng']
+    dlat    = st1_lat - st0_lat
+    dlong   = st1_lng - st0_lng
+    time    = travel[origin][dest]
+
+    column_name = ['hour', 'origin_lat', 'origin_long', 'dest_lat', 'dest_long', 'delta_lat', 'delta_long', 'time_taken']
+    value       = [hour, st0_lat, st0_lng, st1_lat, st1_lng, dlat, dlong, time]
+    df          = DataFrame(value, column_name).transpose()
+
+    return xgb.DMatrix(df, enable_categorical=True)
+
+
 def create_proposal(route_data: dict, travel: dict, travel_sort: dict) -> list:
     '''
+    Create a list containing the proposed sequence for the route
     Params:
     route_data : data of the current route
     trav       : travel times of this route
     trav_sort  : sorted travel times of this route
     '''
-    trav      = travel.copy()
-    trav_sort = travel_sort.copy()
-    station   = get_station(route_data)
-    propose   = [station,]
-    to_go     = []
+    trav        = travel.copy()
+    trav_sort   = travel_sort.copy()
+    station     = get_station(route_data)
+    propose     = [station,]
+    to_go       = []
+    time_passed = 0.0
     for stops in route_data['stops']:
         to_go.append(stops)
     
@@ -198,12 +234,18 @@ def create_proposal(route_data: dict, travel: dict, travel_sort: dict) -> list:
         scores = {}
         
         for next_stop in trav_sort[current][:3]:
-            # Insert prediction stuff here and assign to scores[next_stop+'_self']
+            test_pred = create_dmatrix(route_data, travel, current, next_stop, time_passed)
+            pred      = exp(model.predict(test_pred)) - 1 # returns an 1*1 array
+
+            scores[next_stop+'_self'] = pred[0]
 
             sum = 0
             scores[next_stop] = {}
             for future_stop in trav_sort[next_stop][:3]:
-                # Insert prediction stuff here and assign to scores[next_stop][future_stop] and add to sum
+                test_pred = create_dmatrix(route_data, travel, current, next_stop, time_passed)
+                pred      = exp(model.predict(test_pred)) - 1 # returns an 1*1 array
+                
+                scores[next_stop][future_stop] = pred[0]
             
             scores[next_stop+'_total'] = scores[next_stop+'_self'] + sum
         
@@ -213,7 +255,10 @@ def create_proposal(route_data: dict, travel: dict, travel_sort: dict) -> list:
                 best = next_stop
         
         propose.extend(best)
+        time_passed += travel[current][best]
         current = best
+    
+    return propose
 
 
 # %%
