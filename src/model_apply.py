@@ -176,6 +176,7 @@ for route in prediction_routes:
     result[route] = create_proposal(prediction_routes[route], travel_times[route], travel_times_sorted[route])
 
 logging.info('Prediction done')
+gc.collect()
 
 
 # %%
