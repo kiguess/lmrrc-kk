@@ -253,7 +253,7 @@ def create_proposal(route_data: dict, travel: dict, travel_sort: dict) -> list:
                 
                 scores[next_stop][future_stop] = pred[0]
             
-            scores[next_stop+'_total'] = scores[next_stop+'_self'] + sum
+            scores[next_stop+'_total'] = scores[next_stop+'_self'] + sum  # the final score to use for considering which to choose
             if scores[next_stop+'_total']>scores[best+'_total']:
                 best = next_stop
         
@@ -266,32 +266,38 @@ def create_proposal(route_data: dict, travel: dict, travel_sort: dict) -> list:
 
 
 # %%
-# Apply faux algorithms to pass time
-time.sleep(1)
-print('Solving Dark Matter Waveforms')
-time.sleep(1)
-print('Quantum Computer is Overheating')
-time.sleep(1)
-print('Trying Alternate Measurement Cycles')
-time.sleep(1)
-print('Found a Great Solution!')
-time.sleep(1)
-print('Checking Validity')
-time.sleep(1)
-print('The Answer is 42!')
-time.sleep(1)
+# Create all the proposal
+logging.info('Start predicting')
+result = {}
+for route in prediction_routes:
+    logging.info('Start prediction for ' + route)
+    result[route] = create_proposal(prediction_routes[route], travel_times[route], travel_times_sorted[route])
+
+logging.info('Prediction done')
 
 
-print('\nApplying answer with real model...')
-sort_by=model_build_out.get("sort_by")
-print('Sorting data by the key: {}'.format(sort_by))
-output=propose_all_routes(prediction_routes=prediction_routes, sort_by=sort_by)
-print('Data sorted!')
-
+# %%
 # Write output data
-output_path=path.join(BASE_DIR, 'data/model_apply_outputs/proposed_sequences.json')
-with open(output_path, 'w') as out_file:
-    json.dump(output, out_file)
-    print("Success: The '{}' file has been saved".format(output_path))
+logging.info('Outputting the result')
+result_path = path.join(output_path, 'proposed_sequences.json')
+def create_output(result: dict) -> dict:
+    out = {}
+    for route in result:
+        out[route]             = {}
+        out[route]['proposed'] = {}
 
+        for i in range(0, len(result[route]) - 1):
+            stop                         = result[route][i]
+            out[route]['proposed'][stop] = i
+    
+    return out
+
+output = create_output(result)
+
+with open(result_path, 'w') as out_file:
+    json.dump(output, out_file, indent=4)
+
+logging.info('Done')
 print('Done!')
+
+# %%
