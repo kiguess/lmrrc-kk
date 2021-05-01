@@ -16,7 +16,7 @@ BASE_DIR = path.dirname(path.dirname(path.abspath(__file__)))
 output_path  = str(path.join(BASE_DIR, "data/model_build_outputs/"))
 logfile  = path.join(output_path, 'build.log')
 
-logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', filename=logfile, encoding='utf-8', level=logging.DEBUG, filemode='w')
+logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', filename=logfile, level=logging.DEBUG, filemode='w')
 logging.info('Build started')
 
 
