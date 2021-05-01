@@ -211,8 +211,9 @@ def create_proposal(route_data: dict, travel: dict, travel_sort: dict) -> list:
     trav       : travel times of this route
     trav_sort  : sorted travel times of this route
     '''
-    trav        = travel.copy()
-    trav_sort   = travel_sort.copy()
+    from copy import deepcopy
+    trav        = deepcopy(travel)
+    trav_sort   = deepcopy(travel_sort)
     station     = get_station(route_data)
     propose     = [station,]
     to_go       = []
@@ -225,13 +226,18 @@ def create_proposal(route_data: dict, travel: dict, travel_sort: dict) -> list:
         to_go.remove(stop)
 
         for stops in trav:
-            trav[stops].__delitem__(stop)
-            trav_sort[stops].remove(stop)
+            if (trav[stops].__contains__(stop)):
+                trav[stops].__delitem__(stop)
+            if (trav_sort[stops].__contains__(stop)):
+                trav_sort[stops].remove(stop)
 
     current = station
-    while to_go.__len__() != 0:
-        remove_from_all(current)
+    remove_from_all(station)
+    while len(to_go)>0:
         scores = {}
+        
+        first   = trav_sort[current][:1]
+        best    = first[0]
         
         for next_stop in trav_sort[current][:3]:
             test_pred = create_dmatrix(route_data, travel, current, next_stop, time_passed)
@@ -248,15 +254,13 @@ def create_proposal(route_data: dict, travel: dict, travel_sort: dict) -> list:
                 scores[next_stop][future_stop] = pred[0]
             
             scores[next_stop+'_total'] = scores[next_stop+'_self'] + sum
-        
-        best   = trav_sort[current][:1]
-        for next_stop in trav_sort[current][:3]:
             if scores[next_stop+'_total']>scores[best+'_total']:
                 best = next_stop
         
-        propose.extend(best)
+        propose.append(best)
         time_passed += travel[current][best]
         current = best
+        remove_from_all(current)
     
     return propose
 
