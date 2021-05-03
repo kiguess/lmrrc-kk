@@ -10,7 +10,7 @@ BASE_DIR = path.dirname(path.dirname(path.abspath(__file__)))
 output_path  = str(path.join(BASE_DIR, "data/model_apply_outputs/"))
 logfile  = path.join(output_path, 'apply.log')
 
-logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', filename=logfile, level=logging.DEBUG, filemode='w')
+logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', filename=logfile, level=logging.INFO, filemode='w')
 logging.info('Started')
 
 
@@ -198,7 +198,7 @@ def create_output(result: dict) -> dict:
         out[route]             = {}
         out[route]['proposed'] = {}
 
-        for i in range(0, len(result[route]) - 1):
+        for i in range(0, len(result[route])):
             stop                         = result[route][i]
             out[route]['proposed'][stop] = i
     
