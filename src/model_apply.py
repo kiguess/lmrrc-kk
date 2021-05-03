@@ -141,7 +141,7 @@ def create_proposal(route_data: dict, travel: dict, travel_sort: dict) -> list:
         first   = trav_sort[current][:1]
         best    = first[0]
         
-        for next_stop in trav_sort[current][:3]:
+        for next_stop in trav_sort[current][:10]:
             test_pred = create_dmatrix(route_data, travel, current, next_stop, time_passed)
             pred      = exp(model.predict(test_pred)) - 1 # returns an 1*1 array
 
@@ -149,14 +149,14 @@ def create_proposal(route_data: dict, travel: dict, travel_sort: dict) -> list:
 
             sum = 0
             scores[next_stop] = {}
-            for future_stop in trav_sort[next_stop][:3]:
+            for future_stop in trav_sort[next_stop][:5]:
                 test_pred = create_dmatrix(route_data, travel, current, next_stop, time_passed)
                 pred      = exp(model.predict(test_pred)) - 1 # returns an 1*1 array
                 
                 scores[next_stop][future_stop] = pred[0]
                 sum += pred[0]
             
-            scores[next_stop+'_total'] = 5 * scores[next_stop+'_self'] + sum  # the final score to use for considering which to choose
+            scores[next_stop+'_total'] = 10 * scores[next_stop+'_self'] + sum  # the final score to use for considering which to choose
             if scores[next_stop+'_total']>scores[best+'_total']:
                 best = next_stop
         
