@@ -199,7 +199,7 @@ def create_output(result: dict) -> dict:
 output = create_output(result)
 
 with open(result_path, 'w') as out_file:
-    json.dump(output, out_file, indent=4)
+    json.dump(output, out_file)
 
 logging.info('Done')
 print('Done!')
