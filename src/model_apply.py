@@ -154,7 +154,7 @@ def create_proposal(route_data: dict, travel: dict, travel_sort: dict) -> list:
             sum = 0
             scores[next_stop] = {}
             for future_stop in trav_sort[next_stop][:3]:
-                test_pred = create_dmatrix(route_data, travel, current, next_stop, time_passed)
+                test_pred = create_dmatrix(route_data, travel, next_stop, future_stop, time_passed)
                 pred      = exp(model.predict(test_pred)) - 1 # returns an 1*1 array
                 
                 scores[next_stop][future_stop] = pred[0]
