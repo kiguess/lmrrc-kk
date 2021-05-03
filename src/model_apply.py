@@ -133,36 +133,44 @@ def create_proposal(route_data: dict, travel: dict, travel_sort: dict) -> list:
             if (trav_sort[stops].__contains__(stop)):
                 trav_sort[stops].remove(stop)
 
+    logging.debug('Set current to station: '+ station)
     current = station
     remove_from_all(station)
     while len(to_go)>0:
+        logging.debug('Current: ' + current)
+        logging.debug('To go:\n' + str(to_go))
         scores = {}
         
         first   = trav_sort[current][:1]
         best    = first[0]
         
-        for next_stop in trav_sort[current][:10]:
+        for next_stop in trav_sort[current][:3]:
             test_pred = create_dmatrix(route_data, travel, current, next_stop, time_passed)
             pred      = exp(model.predict(test_pred)) - 1 # returns an 1*1 array
 
             scores[next_stop+'_self'] = pred[0]
+            logging.debug('From '+ current + ' to ' + next_stop + ': ' + str(pred[0]))
 
             sum = 0
             scores[next_stop] = {}
-            for future_stop in trav_sort[next_stop][:5]:
+            for future_stop in trav_sort[next_stop][:3]:
                 test_pred = create_dmatrix(route_data, travel, current, next_stop, time_passed)
                 pred      = exp(model.predict(test_pred)) - 1 # returns an 1*1 array
                 
                 scores[next_stop][future_stop] = pred[0]
+                logging.debug('From ' + next_stop + ' to ' + future_stop + ': ' + str(pred[0]))
                 sum += pred[0]
             
-            scores[next_stop+'_total'] = 10 * scores[next_stop+'_self'] + sum  # the final score to use for considering which to choose
+            scores[next_stop+'_total'] = 5 * scores[next_stop+'_self'] + sum  # the final score to use for considering which to choose
+            logging.debug('Final score for ' + current + ' to ' + next_stop+':'+ str(scores[next_stop+'_total']))
             if scores[next_stop+'_total']>scores[best+'_total']:
                 best = next_stop
         
+        logging.debug('Next stop choose : '+ best)
         propose.append(best)
         time_passed += travel[current][best]
         current = best
+        logging.debug('Set best to current, and remove it from list')
         remove_from_all(current)
     
     return propose
