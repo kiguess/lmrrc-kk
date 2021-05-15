@@ -209,9 +209,7 @@ logging.info('Feature scores:\n'+str(feature_scores))
 # %%
 logging.info('Saving model..')
 
-pickle.dump(gbm, open(output_path+'model.sav', 'wb'))
 gbm.save_model(output_path+'model.json')
-gbm.dump_model(output_path+'dump.txt')
 
 logging.info('Model saved')
 
