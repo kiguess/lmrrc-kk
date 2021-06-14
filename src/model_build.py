@@ -2,6 +2,7 @@
 # To add a new markdown cell, type '# %% [markdown]'
 # %%
 from os import path
+from os import remove as rm
 import pandas as pd
 import numpy as np
 import xgboost as xgb
@@ -9,7 +10,6 @@ import json
 import gc
 import logging
 
-import pickle
 from sklearn.model_selection import train_test_split
 
 BASE_DIR = path.dirname(path.dirname(path.abspath(__file__)))
@@ -106,6 +106,7 @@ del(sample_r)
 del(sample_t)
 del(act_seq)
 del(seq)
+rm(output_path+'temp')
 gc.collect()
 logging.info('Garbage collected')
 
