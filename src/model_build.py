@@ -118,14 +118,14 @@ y = route_data['score']
 
 
 # %%
-#Split the data into training, test, and valdiation sets
+# Split the data into training, test, and valdiation sets
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=2018)
 X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.25, random_state=2019)
 logging.info('Data splitted')
 
 
 # %%
-#XGBoost parameters 
+# XGBoost parameters 
 params = {
     'booster':            'gbtree',
     'objective':          'reg:squarederror',
@@ -137,24 +137,21 @@ params = {
     'silent':             1,
     'eval_metric':        'rmse'
 }
-
-
-# %%
 nrounds = 2000
 
 
 # %%
-#Define train and validation sets
+# Define train and validation sets
 dtrain = xgb.DMatrix(X_train, np.log(y_train+1), enable_categorical=True)
 dval = xgb.DMatrix(X_val, np.log(y_val+1), enable_categorical=True)
 
-#this is for tracking the error
+# This is for tracking the error
 watchlist = [(dval, 'eval'), (dtrain, 'train')]
 
 
 # %%
-#Train model
-logging.info('Starting training with params: ' + str(params))
+# Train model
+logging.info(f'Starting training with params: {params}')
 gbm = xgb.train(params,
                 dtrain,
                 num_boost_round = nrounds,
@@ -165,34 +162,28 @@ logging.info('Training finished')
 
 
 # %%
-#Test predictions
+# Test predictions
 logging.info('Running prediction')
 pred = np.exp(gbm.predict(xgb.DMatrix(X_test, enable_categorical=True))) - 1
 logging.info('Prediction done')
 
 
 # %%
-#Use mean absolute error to get a basic estimate of the error
+# Use mean absolute error to get a basic estimate of the error
 mae = (abs(pred - y_test)).mean()
-mae
-logging.info('Mean absolute error:\n'+str(mae))
+logging.info(f'Mean absolute error: {mae}')
 
 
 # %%
-#Use root mean square error to get a basic estimate of the error
+# Use root mean square error to get a basic estimate of the error
 from math import sqrt
 rmse = sqrt(((pred - y_test)**2).mean())
-logging.info('Root Mean Square Error:\n'+str(rmse))
+logging.info(f'Root Mean Square Error: {rmse}')
 
 
 # %%
-#Take a look at feature importance
+# Take a look at feature importance
 feature_scores = gbm.get_fscore()
-feature_scores
-
-
-# %%
-#This is not very telling, so let's scale the features
 summ = 0
 for key in feature_scores:
     summ = summ + feature_scores[key]
@@ -200,8 +191,7 @@ for key in feature_scores:
 for key in feature_scores:
     feature_scores[key] = feature_scores[key] / summ
 
-feature_scores
-logging.info('Feature scores:\n'+str(feature_scores))
+logging.info(f'Feature scores:\n{feature_scores}')
 
 
 # %% [markdown]
