@@ -139,6 +139,12 @@ def create_proposal(route_data: dict, travel: dict, travel_sort: dict) -> list:
     while len(to_go)>0:
         logging.debug(f'Current: {current}')
         logging.debug(f'To go:\n{to_go}')
+
+        if (to_go.__len__() == 1):
+            logging.debug('Only one to go, set that as next and break')
+            propose.append(to_go[0])
+            break
+
         scores = {}
         
         first   = trav_sort[current][:1]
